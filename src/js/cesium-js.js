@@ -26,6 +26,7 @@ import {Ion,
     Viewer,
 } from 'cesium';
 
+import "../css/styles.css";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import * as turf from '@turf/turf';
 

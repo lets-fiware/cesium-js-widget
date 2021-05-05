@@ -8,3 +8,5 @@ src/js/.tern-port
 .DS_Store
 volumes/
 showcase/
+.devcontainer/
+.vscode/

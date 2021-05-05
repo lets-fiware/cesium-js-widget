@@ -33,7 +33,7 @@ sudo npm install -g grunt-cli
 And now, you can use grunt:
 
 ```bash
-grunt
+npm run build
 ```
 
 If everything goes well, you will find a wgt file in the `dist` folder.

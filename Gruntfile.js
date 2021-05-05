@@ -6,7 +6,6 @@
  * Licensed under the BSD 3-Clause License
  */
 
-const path = require('path');
 const ConfigParser = require('wirecloud-config-parser');
 const parser = new ConfigParser('src/config.xml');
 
@@ -30,7 +29,7 @@ module.exports = function (grunt) {
                 options: {
                     configFile: '.eslintrc'
                 },
-                src: 'Gruntfile.js',
+                src: '*.js',
             },
             test: {
                 options: {
@@ -43,24 +42,24 @@ module.exports = function (grunt) {
         copy: {
             libs: {
                 files: [
-                    {expand: true, cwd: 'src/', src: ['*', 'doc/*', 'css/**', 'images/**'], dest: 'build/'}
+                    // {expand: true, cwd: 'src/', src: ['*', 'doc/*', 'css/**', 'images/**'], dest: 'build/'}
+                    {expand: true, cwd: 'src/', src: ['*', 'doc/*', 'images/**'], dest: 'build/'}
                 ]
             }
         },
-
         run: {
-            webpack: {
-                cmd: 'webpack',
-                arg: [
-                    'build'
+            'webpack-dev': {
+                cmd: './node_modules/webpack/bin/webpack.js',
+                args: [
+                    '--config',
+                    'webpack.dev.js',
                 ]
             },
             'webpack-prod': {
-                cmd: 'webpack',
-                arg: [
-                    'build',
-                    '-c',
-                    'webpack.config.production.js'
+                cmd: './node_modules/webpack/bin/webpack.js',
+                args: [
+                    '--config',
+                    'webpack.prod.js',
                 ]
             }
         },
@@ -192,7 +191,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-coveralls');
     grunt.loadNpmTasks('grunt-strip-code');
     grunt.loadNpmTasks('grunt-text-replace');
-    grunt.loadNpmTasks('grunt-webpack');
     grunt.loadNpmTasks('grunt-run');
 
 
@@ -212,28 +210,25 @@ module.exports = function (grunt) {
         'coveralls'
     ]);
 
-    grunt.registerTask('build', [
+    grunt.registerTask('development', [
+        'eslint',
         'copy:libs',
-        // 'strip_code',
-        'run:webpack',
+        'run:webpack-dev',
         'compress:widget'
     ]);
 
     grunt.registerTask('default', [
-        // 'test',
-        'build'
     ]);
 
     grunt.registerTask('publish', [
-        'default',
+        'production',
         'wirecloud'
     ]);
 
     grunt.registerTask('production', [
         'clean:build',
-        // 'eslint',
+        'eslint',
         'copy:libs',
-        // 'strip_code',
         'run:webpack-prod',
         'compress:widget'
     ]);
