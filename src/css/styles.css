@@ -1,0 +1,37 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+#map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+.cesium {
+  position: absolute;
+  top: 0;
+  bottom:0;
+  width:100%;
+}
+
+#buttons {
+    top: 5px;
+    right: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#container {
+  position: absolute;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  top: 42px;
+}

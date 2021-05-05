@@ -1,0 +1,145 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<widget xmlns="http://wirecloud.conwet.fi.upm.es/ns/macdescription/1" vendor="FISUDA" name="cesiumjs" version="0.1.0">
+
+    <details>
+        <title>__MSG_displayName__</title>
+        <homepage>https://github.com/lets-fiware/cesium-js-widget</homepage>
+        <authors>Kazuhito Suda</authors>
+        <email>wirecloud@letsfiware.jp</email>
+        <image>images/catalogue.png</image>
+        <smartphoneimage></smartphoneimage>
+        <description>__MSG_description__</description>
+        <longdescription>DESCRIPTION.md</longdescription>
+        <changelog>doc/changelog.md</changelog>
+        <doc>doc/userguide.md</doc>
+        <license>The 3-Clause BSD License</license>
+        <issuetracker>https://github.com/lets-fiware/cesium-js-widget/issues</issuetracker>
+    </details>
+
+    <requirements>
+        <feature name="DashboardManagement"/>
+        <feature name="StyledElements"/>
+    </requirements>
+
+    <preferences>
+        <preference
+            name="initialPosition"
+            type="text"
+            label="Initial position"
+            description="Decimal coordinates and hight where map will be centered on load (e.g. `52, 5, 3000000`). Leave this setting empty if you don't want to center the map at init. Remember to change the initial zoom level if you provide an initial location."
+            default="" />
+        <preference
+            name="initialOrientation"
+            type="text"
+            label="Initial orientation"
+            description="Initial heading, pitch and roll"
+            default="" />
+        <preference
+            name="mapStyle"
+            label="Map Style"
+            type="list"
+            description="Add raster map"
+            default="OSM">
+            <option label="Off" value="OFF"/>
+            <option label="Open Street Map" value="OSM"/>
+            <option label="Japan GSI standard map" value="GSI_STD"/>
+            <option label="Japan GSI pale map" value="GSI_PALE"/>
+            <option label="Japan GSI english map" value="GSI_ENG"/>
+            <option label="Japan GSI blank map" value="GSI_BLANK"/>
+            <option label="Japan GSI relief map" value="GSI_RELIEF"/>
+        </preference>
+        <preference
+            name="animation"
+            label="Animation widget"
+            type="boolean"
+            description="Add animation widget"
+            default="false" />
+        <preference
+            name="baseLayerPicker"
+            label="Base Layer Picker"
+            type="boolean"
+            description="Add base layer picker"
+            default="false" />
+        <preference
+            name="fullscreenButton"
+            label="Fullscreen Button"
+            type="boolean"
+            description="Add fullscreen button"
+            default="false" />
+        <preference
+            name="geocoder"
+            label="Geocoder widget"
+            type="boolean"
+            description="Add geocoder widget"
+            default="false" />
+        <preference
+            name="homeButton"
+            label="Home Button"
+            type="boolean"
+            description="Add home button"
+            default="false" />
+        <preference
+            name="sceneModePicker"
+            label="Scene Mode Picker"
+            type="boolean"
+            description="Add scene mode picker"
+            default="false" />
+        <preference
+            name="timeline"
+            label="Timeline widget"
+            type="boolean"
+            description="Add timeline widget"
+            default="false" />
+        <preference
+            name="navigationHelpButton"
+            label="Help Button"
+            type="boolean"
+            description="Add navigation help button"
+            default="false" />
+        <preference
+            name="token"
+            type="text"
+            label="Ion Token"
+            description="Cesium Ion token"
+            default=""/>
+        <preference
+            name="bing"
+            type="text"
+            label="Bing Maps Key"
+            description="Bing Maps Key"
+            default=""/>
+        <preference
+            name="debug"
+            label="Debug"
+            type="boolean"
+            description="debug"
+            default="false" />
+    </preferences>
+
+    <wiring>
+        <inputendpoint name="layerInfo" type="text" label="Layer Info" description="Add or remove layers to the map, in addition to changing its base layer." actionlabel="Update Layers" friendcode="wms-layer-command"/>
+        <inputendpoint name="poiInput" type="text" label="Insert/Update PoIs" description="Insert or update a Point of Interest." friendcode="poi poi-list"/>
+        <inputendpoint name="poiInputCenter" type="text" label="Center PoIs" description="Insert or update a Point of Interest and center the map on it." actionlabel="Center" friendcode="poi poi-list" />
+        <inputendpoint name="replacePoIs" type="text" label="Replace PoIs" description="Replace all the rendered PoIs by the ones provided in the event." friendcode="poi poi-list"/>
+        <inputendpoint name="deletePoiInput" type="text" label="Delete PoIs" description="Removes one or more point of interests from the map." friendcode="poi poi-list" />
+        <inputendpoint name="commnadInput" type="text" label="Execute commands" description="Excecute commnads"/>
+        <outputendpoint name="poiOutput" type="text" label="PoI selected" description="A PoI has been selected on the map" friendcode="poi"/>
+        <outputendpoint name="poiListOutput" type="text" label="Visible PoIs" description="List of visible PoIs" friendcode="poi-list"/>
+
+    </wiring>
+
+    <contents src="index.html" useplatformstyle="true"/>
+    <rendering height="300px" width="30%"/>
+
+    <translations default="en">
+        <translation lang="en">
+            <msg name="displayName">Cesium.js widget</msg>
+            <msg name="description">Map viewer widget using Cesium.js.</msg>
+        </translation>
+        <translation lang="ja">
+            <msg name="displayName">Cesium.js ウィジェット</msg>
+            <msg name="description">Cesium.js を使用した地図ビューアー</msg>
+        </translation>
+    </translations>
+
+</widget>
