@@ -1,6 +1,6 @@
-## Cesium.js widget v0.x.0
+## Cesium.js widget v0.2.0 - May 9, 2021
 
-- Fix register PoIs
+- Fix register PoIs (#4)
 - Improve build process (#3)
 - Add Japan GSI providers (#2)
 - Improve build process (#1)
