@@ -8,8 +8,9 @@
 
 import CesiumJs from './cesium-js';
 
+"use strict";
+
 (function () {
-    "use strict";
 
     const parseInputEndpointData = function parseInputEndpointData(data) {
         if (data == null) {

@@ -2,6 +2,7 @@ const path = require("path");
 
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const cesiumBuild = 'node_modules/cesium/Build/Cesium';
 
@@ -10,8 +11,6 @@ const parser = new ConfigParser('src/config.xml');
 const metadata = parser.getData();
 
 module.exports = {
-    mode: 'production',
-    devtool: false,
     context: __dirname,
     entry: {
         main: './src/js/main.js'
@@ -28,11 +27,13 @@ module.exports = {
         toUrlUndefined: true
     },
     node: {
-        fs: "empty",
+        fs: 'empty',
         Buffer: false,
-        http: "empty",
-        https: "empty",
-        zlib: "empty"
+        http: 'empty',
+        https: 'empty',
+        zlib: 'empty',
+        net: 'empty',
+        tls: 'empty',
     },
     resolve: {
         mainFields: ['module', 'main']
@@ -41,8 +42,17 @@ module.exports = {
         unknownContextCritical: false,
         rules: [
             {
+                test: /\.js$/,
+                include: path.resolve(__dirname, 'src/js'),
+                use: ['babel-loader']
+            },
+            {
                 test: /\.css$/,
-                use: ['style-loader', 'css-loader']
+                include: [
+                    path.resolve(__dirname, 'src/css'),
+                    path.resolve(__dirname, 'node_modules/cesium/Build/Cesium/Widgets'),
+                ],
+                use: [MiniCssExtractPlugin.loader, 'css-loader']
             },
             {
                 test: /\.(png|gif|jpg|jpeg|svg|xml)$/,
@@ -61,16 +71,9 @@ module.exports = {
         }),
         new webpack.DefinePlugin({
             CESIUM_BASE_URL: JSON.stringify('/showcase/media/' + metadata.vendor + '/' + metadata.name + '/' + metadata.version + '/js')
-        })
+        }),
+        new MiniCssExtractPlugin({
+            filename: '../css/style.css',
+        }),
     ],
-    devServer: {
-        contentBase: path.join(__dirname, 'build'),
-        publicPath: '/js/',
-        open: false,
-        host: '0.0.0.0',
-        port: 8080,
-        hot: true,
-        watchContentBase: true,
-        inline: true
-    }
 }

@@ -26,8 +26,11 @@ import {Ion,
     Viewer,
 } from 'cesium';
 
+import "../css/styles.css";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import * as turf from '@turf/turf';
+
+"use strict";
 
 export default function CesiumJs() {
     this.pois = {};
@@ -85,8 +88,8 @@ const TITLE_MAP_STYLES = {
 
 CesiumJs.prototype.init = function init() {
     let initialPosition = MashupPlatform.prefs.get('initialPosition').split(',').map(Number);
-    if (initialPosition.length != 3 
-        || !Number.isFinite(initialPosition[0]) 
+    if (initialPosition.length != 3
+        || !Number.isFinite(initialPosition[0])
         || !Number.isFinite(initialPosition[1])
         || !Number.isFinite(initialPosition[2])) {
         if (MashupPlatform.context.get('language') == 'ja') {
@@ -97,8 +100,8 @@ CesiumJs.prototype.init = function init() {
     }
 
     let initialOrientation = MashupPlatform.prefs.get('initialOrientation').split(',').map(Number);
-    if (initialOrientation.length != 3 
-        || !Number.isFinite(initialOrientation[0]) 
+    if (initialOrientation.length != 3
+        || !Number.isFinite(initialOrientation[0])
         || !Number.isFinite(initialOrientation[1])
         || !Number.isFinite(initialOrientation[2])) {
         initialOrientation = [0, -1.3, 0];
@@ -111,7 +114,7 @@ CesiumJs.prototype.init = function init() {
         baseLayerPicker: MashupPlatform.prefs.get('baseLayerPicker'),
         fullscreenButton: MashupPlatform.prefs.get('fullscreenButton'),
         geocoder: MashupPlatform.prefs.get('geocoder'),
-        homeButton:MashupPlatform.prefs.get('homeButton'),
+        homeButton: MashupPlatform.prefs.get('homeButton'),
         timeline: MashupPlatform.prefs.get('timeline'),
         navigationHelpButton: MashupPlatform.prefs.get('navigationHelpButton'),
         sceneModePicker: MashupPlatform.prefs.get('sceneModePicker'),
@@ -149,32 +152,32 @@ CesiumJs.prototype.init = function init() {
 
     this.isMoving = false;
 
-    this.viewer.camera.moveStart.addEventListener(() => { 
+    this.viewer.camera.moveStart.addEventListener(() => {
         this.isMoving = true;
     });
-    this.viewer.camera.moveEnd.addEventListener(() => { 
+    this.viewer.camera.moveEnd.addEventListener(() => {
         this.isMoving = false;
     });
 
     this.screenSpaceEventHandler = new ScreenSpaceEventHandler(this.viewer.canvas);
     // sendSelectedPoI
-    this.screenSpaceEventHandler.setInputAction( e => { 
-            if (MashupPlatform.widget.outputs.poiOutput.connected) {
-                const picked = this.viewer.scene.pick(e.position); 
-                if (picked) { 
-                    const feature = this.pois[picked.id.id];
+    this.screenSpaceEventHandler.setInputAction(e => {
+        if (MashupPlatform.widget.outputs.poiOutput.connected) {
+            const picked = this.viewer.scene.pick(e.position);
+            if (picked) {
+                const feature = this.pois[picked.id.id];
+                if (feature) {
+                    MashupPlatform.widget.outputs.poiOutput.pushEvent(feature);
+                } else {
+                    const feature = this.pois[picked.id.entityCollection.owner.name];
                     if (feature) {
-                        MashupPlatform.widget.outputs.poiOutput.pushEvent(feature); 
-                    } else {
-                        const feature = tihs.pois[picked.id.entityCollection.owner.name];
-                        if (feature) {
-                            MashupPlatform.widget.outputs.poiOutput.pushEvent(feature); 
-                        }
+                        MashupPlatform.widget.outputs.poiOutput.pushEvent(feature);
                     }
                 }
             }
-        }, 
-        ScreenSpaceEventType.LEFT_CLICK 
+        }
+    },
+    ScreenSpaceEventType.LEFT_CLICK
     );
 
     // Porting of https://github.com/Wirecloud/ol3-map-widget
@@ -339,7 +342,7 @@ const buildPoint = function buildPoint(poi) {
         ? ((typeof poi.icon === 'string') ? poi.icon : poi.icon.src)
         : this.pinBuilder.fromMakiIconId(
             poi.style.fontSymbol.glyph || 'star',
-            poi.style.fontSymbol.color ||Color.GREEN,
+            poi.style.fontSymbol.color || Color.GREEN,
             poi.style.fontSymbol.size || 48);
 
     return {
@@ -358,7 +361,7 @@ const buildMultiPoint = function buildMultiPoint(poi) {
         ? ((typeof poi.icon === 'string') ? poi.icon : poi.icon.src)
         : this.pinBuilder.fromMakiIconId(
             poi.style.fontSymbol.glyph || 'star',
-            poi.style.fontSymbol.color ||Color.GREEN,
+            poi.style.fontSymbol.color || Color.GREEN,
             poi.style.fontSymbol.size || 48);
 
     const ds = new CustomDataSource(poi.id);
@@ -385,12 +388,12 @@ const buildLineString = function buildLineString(poi) {
     return {
         id: poi.id,
         name: poi.data.name || '',
-        description: '',　
-        polyline : { // Cesium.PolylineGraphics.ConstructorOptions
+        description: '',
+        polyline: { // Cesium.PolylineGraphics.ConstructorOptions
             positions: Cartesian3.fromDegreesArray(coordinates),
             width: poi.style.stroke.width || 3,
             material: Color.RED,
-        }        
+        }
     }
 }
 
@@ -404,12 +407,12 @@ const buildMultiLineString = function buildMultiLineString(poi) {
         }
         ds.entities.add({
             name: poi.data.name || '',
-            description: '',　
-            polyline : { // Cesium.PolylineGraphics.ConstructorOptions
+            description: '',
+            polyline: { // Cesium.PolylineGraphics.ConstructorOptions
                 positions: Cartesian3.fromDegreesArray(coordinates),
-                width: pio.style.stroke.width || 3,
+                width: poi.style.stroke.width || 3,
                 material: Color.RED,
-            }        
+            }
         });
     }
     return ds;
@@ -424,15 +427,15 @@ const buildPolygon = function buildPolygon(poi) {
     return {
         id: poi.id,
         name: poi.data.name || '',
-        description: '',　
-        polygon : { // Cesium.PolygonGraphics.ConstructorOptions
+        description: '',
+        polygon: { // Cesium.PolygonGraphics.ConstructorOptions
             hierarchy: Cartesian3.fromDegreesArray(coordinates),
-            height : poi.height || 0,
-            material : poi.style.fill.color || Color.BLUE.withAlpha(0.1),
-            outline : true,
-            outlineColor : poi.style.fill.outlineColor || Color.BLUE,
+            height: poi.height || 0,
+            material: poi.style.fill.color || Color.BLUE.withAlpha(0.1),
+            outline: true,
+            outlineColor: poi.style.fill.outlineColor || Color.BLUE,
             outlineWidth: poi.style.fill.outlineWidth || 5,
-        }        
+        }
     }
 }
 
@@ -446,13 +449,13 @@ const buildMultiPolygon = function buildMultiPolygon(poi) {
         }
         ds.entities.add({
             name: poi.data.name || '',
-            description: '',　
-            polygon : { // Cesium.PolygonGraphics.ConstructorOptions
+            description: '',
+            polygon: { // Cesium.PolygonGraphics.ConstructorOptions
                 hierarchy: Cartesian3.fromDegreesArray(coordinates),
-                height : poi.height || 0,
-                material : poi.style.fill.color || Color.BLUE.withAlpha(0.1),
-                outline : true,
-                outlineColor : poi.style.fill.outlineColor || Color.BLUE,
+                height: poi.height || 0,
+                material: poi.style.fill.color || Color.BLUE.withAlpha(0.1),
+                outline: true,
+                outlineColor: poi.style.fill.outlineColor || Color.BLUE,
                 outlineWidth: poi.style.fill.outlineWidth || 5,
             }
         });
@@ -467,45 +470,6 @@ CesiumJs.prototype.execCommands = function (commands) {
 // =========================================================================
 // PRIVATE MEMBERS
 // =========================================================================
-const colorTable = {
-    transparent: '',
-    white: '#ffffff',
-    silver: '#c0c0c0',
-    gray: '#808080',
-    black: '#000000',
-    red: '#ff0000',
-    maroon: '#800000',
-    yellow: '#ffff00',
-    olive: '#808000',
-    lime: '#00ff00',
-    green: '#008000',
-    aqua: '#00ffff',
-    teal: '#008080',
-    blue: '#0000ff',
-    navy: '#000080',
-    fuchsia: '#ff00ff',
-    purple: '#800080',
-    orange: '#ffa500',
-    naivy: '#1f2f54',
-    'fi-cyan': '#5dc0cf',
-    'fi-naivy': '#002e67',
-    'fi-green': '#15a97c',
-    'fi-grey': '#b1b2b4',
-    'fi-red': '#d36b59',
-}
-
-const getColorCode = function getColorCode(color, defaultColor) {
-    if (color != null) {
-        color = color.toLowerCase();
-        if (color.substr(0, 1) == '#') {
-            return color;
-        } else if (color in colorTable) {
-            return colorTable[color];
-        }
-    }
-    return defaultColor;
-}
-
 const sendPoIList = function sendPoIList() {
     if (MashupPlatform.widget.outputs.poiListOutput.connected) {
         const rect = this.viewer.camera.computeViewRectangle(this.viewer.scene.globe.ellipsoid, this.scratchRectangle);
@@ -591,7 +555,7 @@ const commandList = {
                 destination: Cartesian3.fromDegrees(value.longitude, value.latitude, value.height || 0.0)
             })
         }
-    
+
         const tileset = this.viewer.scene.primitives.add(
             new Cesium3DTileset({
                 url: value.url
@@ -606,7 +570,7 @@ const commandList = {
 
         execEnd.call(this);
     },
-    'setView': function(value) {
+    'setView': function (value) {
         this.viewer.camera.setView({
             destination: Cartesian3.fromDegrees(
                 value.longitude,
@@ -616,9 +580,9 @@ const commandList = {
         })
         execEnd.call(this);
     },
-    'flyto': function(value) {
+    'flyto': function (value) {
         this.viewer.camera.flyTo({
-            destination : Cesium.Cartesian3.fromDegrees(
+            destination: Cartesian3.fromDegrees(
                 value.longitude,
                 value.latitude,
                 value.height || 0.0
@@ -630,11 +594,11 @@ const commandList = {
         // Lock camera to a point
         const center = Cartesian3.fromDegrees(value.longitude, value.latitude, value.height);
         const transform = Transforms.eastNorthUpToFixedFrame(center);
-        this.viewer.scene.camera.lookAtTransform(transform, new HeadingPitchRange(0, -Math.PI/8, 2900));
+        this.viewer.scene.camera.lookAtTransform(transform, new HeadingPitchRange(0, -Math.PI / 8, 2900));
 
         // Orbit this point
         this. viewer.clock.onTick.addEventListener(clock => {
-          this. viewer.scene.camera.rotateRight(0.005);
+            this. viewer.scene.camera.rotateRight(0.005);
         });
         execEnd.call(this);
     },
