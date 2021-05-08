@@ -50,10 +50,11 @@ available on Read the Docs.
 
 The Cesium.js widget makes use of the following libraries:
 
-| Libraries                                             | OSS License          |
-| ----------------------------------------------------- | -------------------- |
-| [CesiumGS/cesium](https://github.com/CesiumGS/cesium) | Apache-2.0 License   |
-| [Turfjs/turf](https://github.com/Turfjs/turf)         | MIT License          |
+| Libraries                                                                     | OSS License          |
+| ----------------------------------------------------------------------------- | -------------------- |
+| [CesiumGS/cesium](https://github.com/CesiumGS/cesium)                         | Apache-2.0 License   |
+| [Turfjs/turf](https://github.com/Turfjs/turf)                                 | MIT License          |
+| [lets-fiware/Cesium-JapanGSI](https://github.com/lets-fiware/Cesium-JapanGSI) | MIT License          |
 
 The dependencies of dependencies have been omitted from the list.
 
