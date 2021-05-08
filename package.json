@@ -2,8 +2,8 @@
   "description": "This package.json file is only used for installing npm dependencies. But this is not an installable node package, but a WireCloud widget. Take a look into src/config.xml for more details about this widget",
   "scripts": {
     "debug": "./node_modules/webpack-cli/bin/cli.js serve --config webpack.dev.js",
-    "dev": "grunt --dev development",
-    "build": "grunt production"
+    "dev": "./node_modules/grunt-cli/bin/grunt --dev development",
+    "build": "./node_modules/grunt-cli/bin/grunt production"
   },
   "devDependencies": {
     "@babel/core": "^7.11.6",
@@ -17,7 +17,6 @@
     "grunt": "^1.4.0",
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-compress": "^1.6.0",
-    "grunt-contrib-copy": "^1.0.0",
     "grunt-coveralls": "^2.0.0",
     "grunt-eslint": "^23.0.0",
     "grunt-karma": "^3.0.2",
