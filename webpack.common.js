@@ -66,7 +66,11 @@ module.exports = {
                 { from: path.join(cesiumBuild, 'Workers'), to: 'Workers' },
                 { from: path.join(cesiumBuild, 'Assets'), to: 'Assets' },
                 { from: path.join(cesiumBuild, 'Widgets'), to: 'Widgets' },
-                { from: path.join(cesiumBuild, 'ThirdParty'), to: 'ThirdParty' }
+                { from: path.join(cesiumBuild, 'ThirdParty'), to: 'ThirdParty' },
+                { context: '', from: 'LICENSE', to: path.resolve(__dirname, 'build') },
+                { context: 'src', from: '*', to: path.resolve(__dirname, 'build') },
+                { context: 'src', from: 'doc/*', to: path.resolve(__dirname, 'build') },
+                { context: 'src', from: 'images/*', to: path.resolve(__dirname, 'build') },
             ],
         }),
         new webpack.DefinePlugin({

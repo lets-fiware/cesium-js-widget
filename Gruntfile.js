@@ -39,14 +39,6 @@ module.exports = function (grunt) {
             }
         },
 
-        copy: {
-            libs: {
-                files: [
-                    // {expand: true, cwd: 'src/', src: ['*', 'doc/*', 'css/**', 'images/**'], dest: 'build/'}
-                    {expand: true, cwd: 'src/', src: ['*', 'doc/*', 'images/**'], dest: 'build/'}
-                ]
-            }
-        },
         run: {
             'webpack-dev': {
                 cmd: './node_modules/webpack/bin/webpack.js',
@@ -186,7 +178,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('gruntify-eslint');
     grunt.loadNpmTasks('grunt-contrib-compress');
-    grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-coveralls');
     grunt.loadNpmTasks('grunt-strip-code');
@@ -211,8 +202,8 @@ module.exports = function (grunt) {
     ]);
 
     grunt.registerTask('development', [
+        'clean:build',
         'eslint',
-        'copy:libs',
         'run:webpack-dev',
         'compress:widget'
     ]);
@@ -228,7 +219,6 @@ module.exports = function (grunt) {
     grunt.registerTask('production', [
         'clean:build',
         'eslint',
-        'copy:libs',
         'run:webpack-prod',
         'compress:widget'
     ]);

@@ -24,16 +24,16 @@ Install other npm dependencies by running:
 npm install
 ```
 
-In order to build this widget, you need to download grunt:
-
-```bash
-sudo npm install -g grunt-cli
-```
-
-And now, you can use grunt:
+In order to build this widget, you can use npm:
 
 ```bash
 npm run build
+```
+
+or
+
+```bash
+npm run dev
 ```
 
 If everything goes well, you will find a wgt file in the `dist` folder.
