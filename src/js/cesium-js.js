@@ -6,7 +6,7 @@
  * Licensed under Apache-2.0 License
  */
 
-import {Ion,
+import {
     Cartesian3,
     Cesium3DTileStyle,
     Cesium3DTileset,
@@ -15,6 +15,7 @@ import {Ion,
     CustomDataSource,
     Ellipsoid,
     HeadingPitchRange,
+    Ion,
     Math,
     OpenStreetMapImageryProvider,
     PinBuilder,
@@ -29,6 +30,7 @@ import {Ion,
 import "../css/styles.css";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import * as turf from '@turf/turf';
+import { JapanGSITerrainProvider, JapanGSIImageryProvider } from '@lets-fiware/cesium-japangsi';
 
 "use strict";
 
@@ -602,5 +604,31 @@ const commandList = {
         });
         execEnd.call(this);
     },
-
+    'addgsiprovider': function (value) {
+        this.viewer.imageryLayers.removeAll();
+        this.viewer.imageryLayers.addImageryProvider(
+            new JapanGSIImageryProvider(
+                value.imagery || { layerLists: ["ort","relief","std"] }
+            )
+        );
+        this.viewer.terrainProvider = new JapanGSITerrainProvider(
+            value.terrain || {}
+        );
+        execEnd.call(this);
+    },
+    'addgsiimageryprovider': function (value) {
+        this.viewer.imageryLayers.removeAll();
+        this.viewer.imageryLayers.addImageryProvider(
+            new JapanGSIImageryProvider(
+                value.imagery || { layerLists: ["ort","relief","std"] }
+            )
+        );
+        execEnd.call(this);
+    },
+    'addgsiterrainprovider': function (value) {
+        this.viewer.terrainProvider = new JapanGSITerrainProvider(
+            value.terrain || {}
+        );
+        execEnd.call(this);
+    },
 }
