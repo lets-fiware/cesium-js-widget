@@ -1,4 +1,4 @@
-## v0.x.0
+## v0.2.0
 
 - register PoIs を修正
 - Japan GSI providers を追加

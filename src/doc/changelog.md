@@ -1,4 +1,4 @@
-## v0.x.0
+## v0.2.0
 
 - Fix register PoIs
 - Add Japan GSI providers
