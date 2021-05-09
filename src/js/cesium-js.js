@@ -264,107 +264,109 @@ CesiumJs.prototype.replacePoIs = function replacePoIs(pois_info) {
 }
 
 CesiumJs.prototype.centerPoI = function centerPoI(poi_info) {
-    if (poi_info.length) {
-        poi_info.forEach(poi => registerPoI.call(this, poi, true));
-        const poi = poi_info[poi_info.length - 1];
-        if (poi.location.type == 'Point') {
-            this.viewer.flyTo(this.pois[poi.id]);
-        } else {
-            const box = turf.envelope(getFeature(poi)).bbox;
-            const rect = new Rectangle();
-            Rectangle.fromDegrees(box[0], box[1], box[2], box[3], rect);
-            this.viewer.camera.flyTo({
-                destination: rect
-            });
-        }
+    const features = poi_info.map(poi => registerPoI.call(this, poi, true));
+    if (poi_info.length > 1 || (poi_info.length == 1 && poi_info[0].location.type != 'Point')) {
+        const box = turf.envelope(turf.featureCollection(features)).bbox;
+        const rect = new Rectangle();
+        Rectangle.fromDegrees(box[0], box[1], box[2], box[3], rect);
+        this.viewer.camera.flyTo({
+            destination: rect
+        });
+    } else {
+        this.viewer.flyTo(this.viewer.entities.getById(poi_info[0].id));
     }
     sendPoIList.call(this);
 }
 
 CesiumJs.prototype.removePoIs = function removePoIs(pois_info) {
     pois_info.forEach(poi => {
-        if (!this.pois[poi.id]) {
-            return;
-        }
-        const e = this.viewer.entities.getById(poi.id);
-        if (e != null) {
-            this.viewer.entities.remove(e);
-        } else {
-            const e = this.viewer.dataSources.getByName(poi.id)
-            if (e != null) {
-                this.viewer.dataSources.remove(e[0], true);
-            }
-        }
+        removePoi.call(this, poi);
         delete this.pois[poi.id];
     });
     sendPoIList.call(this);
 }
 
 const registerPoI = function registerPoI(poi, update) {
+    removePoi.call(this, poi);
     if (!poi.data) {
         poi.data = {};
     }
-    if (!poi.style) {
-        poi.style = {};
+    const style = (poi.style) ? poi.style : {}
+    if (!style.fontSymbol) {
+        style.fontSymbol = {}
     }
-    if (!poi.style.fontSymbol) {
-        poi.sytle.fontSymbol = {}
-    }
-    if (!poi.style.fill) {
-        poi.style.fill = {}
+    if (!style.fill) {
+        style.fill = {}
     }
     switch (poi.location.type) {
     case 'Point':
-        this.viewer.entities.add(buildPoint.call(this, poi));
+        this.viewer.entities.add(buildPoint.call(this, poi, style));
         break;
     case 'MultiPoint':
-        this.viewer.dataSources.add(buildMultiPoint.call(this, poi));
+        this.viewer.dataSources.add(buildMultiPoint.call(this, poi, style));
         break;
     case 'LineString':
-        this.viewer.entities.add(buildLineString(poi))
+        this.viewer.entities.add(buildLineString(poi, style))
         break;
     case 'MultiLineString':
-        this.viewer.dataSources.add(buildMultiLineString(poi));
+        this.viewer.dataSources.add(buildMultiLineString(poi, style));
         break;
     case 'Polygon':
-        this.viewer.entities.add(buildPolygon(poi))
+        this.viewer.entities.add(buildPolygon(poi, style))
         break;
     case 'MultiPolygon':
-        this.viewer.dataSources.add(buildMultiPolygon(poi));
+        this.viewer.dataSources.add(buildMultiPolygon(poi, style));
         break;
     default:
         MashupPlatform.widget.log(`Unknown type: ${poi.location.type}, id: ${poi.id}`, MashupPlatform.log.INFO);
         return;
     }
     this.pois[poi.id] = poi;
+
+    return getFeature(poi);
 }
 
-const buildPoint = function buildPoint(poi) {
+const removePoi = function removePoi(poi) {
+    if (!this.pois[poi.id]) {
+        return;
+    }
+    const e = this.viewer.entities.getById(poi.id);
+    if (e != null) {
+        this.viewer.entities.remove(e);
+    } else {
+        const e = this.viewer.dataSources.getByName(poi.id)
+        if (e != null) {
+            this.viewer.dataSources.remove(e[0], true);
+        }
+    }
+}
+
+const buildPoint = function buildPoint(poi, style) {
     const image = ('icon' in poi)
         ? ((typeof poi.icon === 'string') ? poi.icon : poi.icon.src)
         : this.pinBuilder.fromMakiIconId(
-            poi.style.fontSymbol.glyph || 'star',
-            poi.style.fontSymbol.color || Color.GREEN,
-            poi.style.fontSymbol.size || 48);
+            style.fontSymbol.glyph || 'star',
+            style.fontSymbol.color || Color.GREEN,
+            style.fontSymbol.size || 48);
 
     return {
-        id: poi.title || poi.id,
+        id: poi.id,
         position: Cartesian3.fromDegrees(poi.location.coordinates[0], poi.location.coordinates[1]),
         billboard: {
             image: image,
             verticalOrigin: VerticalOrigin.BOTTOM,
         },
-        description: poi.infoWindow || poi.tooltip
+        description: poi.infoWindow || poi.tooltip || ''
     };
 }
 
-const buildMultiPoint = function buildMultiPoint(poi) {
+const buildMultiPoint = function buildMultiPoint(poi, style) {
     const image = ('icon' in poi)
         ? ((typeof poi.icon === 'string') ? poi.icon : poi.icon.src)
         : this.pinBuilder.fromMakiIconId(
-            poi.style.fontSymbol.glyph || 'star',
-            poi.style.fontSymbol.color || Color.GREEN,
-            poi.style.fontSymbol.size || 48);
+            style.fontSymbol.glyph || 'star',
+            style.fontSymbol.color || Color.GREEN,
+            style.fontSymbol.size || 48);
 
     const ds = new CustomDataSource(poi.id);
     for (let point of poi.location.coordinates) {
@@ -381,7 +383,7 @@ const buildMultiPoint = function buildMultiPoint(poi) {
     return ds;
 }
 
-const buildLineString = function buildLineString(poi) {
+const buildLineString = function buildLineString(poi, style) {
     const coordinates = [];
     for (let p of poi.location.coordinates) {
         coordinates.push(p[0]);
@@ -393,13 +395,13 @@ const buildLineString = function buildLineString(poi) {
         description: '',
         polyline: { // Cesium.PolylineGraphics.ConstructorOptions
             positions: Cartesian3.fromDegreesArray(coordinates),
-            width: poi.style.stroke.width || 3,
+            width: style.stroke.width || 3,
             material: Color.RED,
         }
     }
 }
 
-const buildMultiLineString = function buildMultiLineString(poi) {
+const buildMultiLineString = function buildMultiLineString(poi, style) {
     const ds = new CustomDataSource(poi.id);
     for (let line of poi.location.coordinates) {
         const coordinates = [];
@@ -412,7 +414,7 @@ const buildMultiLineString = function buildMultiLineString(poi) {
             description: '',
             polyline: { // Cesium.PolylineGraphics.ConstructorOptions
                 positions: Cartesian3.fromDegreesArray(coordinates),
-                width: poi.style.stroke.width || 3,
+                width: style.stroke.width || 3,
                 material: Color.RED,
             }
         });
@@ -420,7 +422,7 @@ const buildMultiLineString = function buildMultiLineString(poi) {
     return ds;
 }
 
-const buildPolygon = function buildPolygon(poi) {
+const buildPolygon = function buildPolygon(poi, style) {
     const coordinates = [];
     for (let p of poi.location.coordinates[0]) { // only no holes
         coordinates.push(p[0]);
@@ -433,15 +435,15 @@ const buildPolygon = function buildPolygon(poi) {
         polygon: { // Cesium.PolygonGraphics.ConstructorOptions
             hierarchy: Cartesian3.fromDegreesArray(coordinates),
             height: poi.height || 0,
-            material: poi.style.fill.color || Color.BLUE.withAlpha(0.1),
+            material: style.fill.color || Color.BLUE.withAlpha(0.1),
             outline: true,
-            outlineColor: poi.style.fill.outlineColor || Color.BLUE,
-            outlineWidth: poi.style.fill.outlineWidth || 5,
+            outlineColor: style.fill.outlineColor || Color.BLUE,
+            outlineWidth: style.fill.outlineWidth || 5,
         }
     }
 }
 
-const buildMultiPolygon = function buildMultiPolygon(poi) {
+const buildMultiPolygon = function buildMultiPolygon(poi, style) {
     const ds = new CustomDataSource(poi.id);
     for (let polygon of poi.location.coordinates) {
         const coordinates = [];
@@ -455,10 +457,10 @@ const buildMultiPolygon = function buildMultiPolygon(poi) {
             polygon: { // Cesium.PolygonGraphics.ConstructorOptions
                 hierarchy: Cartesian3.fromDegreesArray(coordinates),
                 height: poi.height || 0,
-                material: poi.style.fill.color || Color.BLUE.withAlpha(0.1),
+                material: style.fill.color || Color.BLUE.withAlpha(0.1),
                 outline: true,
-                outlineColor: poi.style.fill.outlineColor || Color.BLUE,
-                outlineWidth: poi.style.fill.outlineWidth || 5,
+                outlineColor: style.fill.outlineColor || Color.BLUE,
+                outlineWidth: style.fill.outlineWidth || 5,
             }
         });
     }
@@ -493,24 +495,24 @@ const sendPoIList = function sendPoIList() {
 
 const getFeature = function getFeature(poi) {
     if (!poi.hasOwnProperty('__feature')) {
-        switch (poi.data.location.type) {
+        switch (poi.location.type) {
         case 'Point':
-            poi.__feature = turf.point(poi.data.location.coordinates);
+            poi.__feature = turf.point(poi.location.coordinates);
             break;
         case 'MultiPoint':
-            poi.__feature = turf.multiPoint(poi.data.location.coordinates);
+            poi.__feature = turf.multiPoint(poi.location.coordinates);
             break;
         case 'LineString':
-            poi.__feature = turf.lineString(poi.data.location.coordinates);
+            poi.__feature = turf.lineString(poi.location.coordinates);
             break;
         case 'MultiLineString':
-            poi.__feature = turf.multiLineString(poi.data.location.coordinates);
+            poi.__feature = turf.multiLineString(poi.location.coordinates);
             break;
         case 'Polygon':
-            poi.__feature = turf.polygon(poi.data.location.coordinates);
+            poi.__feature = turf.polygon(poi.location.coordinates);
             break;
         case 'MultiPolygon':
-            poi.__feature = turf.multiPolygon(poi.data.location.coordinates);
+            poi.__feature = turf.multiPolygon(poi.location.coordinates);
             break;
         }
     }
