@@ -1,3 +1,7 @@
+## Cesium.js widget v0.x.0
+
+- Add feature for building marker with Font Awesome icon
+
 ## Cesium.js widget v0.2.0 - May 9, 2021
 
 - Fix register PoIs (#4)

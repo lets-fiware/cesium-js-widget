@@ -6,6 +6,8 @@
  * Licensed under Apache-2.0 License
  */
 
+/* globals MashupPlatform */
+
 import {
     Cartesian3,
     Cesium3DTileStyle,
@@ -232,6 +234,29 @@ CesiumJs.prototype.init = function init() {
     };
     MashupPlatform.mashup.context.registerCallback(update_ui_buttons);
     update_ui_buttons({editing: MashupPlatform.mashup.context.get('editing')});
+
+    // Create a table mapping class name to unicode.
+    this.glyphTable = {};
+    this.get_styleSheets = function get_styleSheets() {
+        return window.top.document.styleSheets;
+    }
+    let found = false;
+    const styleSheets = this.get_styleSheets();
+    for (let i = 0; i < styleSheets.length; i++) {
+        const sheet = styleSheets[i];
+        if (sheet && !found) {
+            const before = '::before';
+            for (let j = 0; j < sheet.cssRules.length; j++) {
+                const cssRule = sheet.cssRules[j];
+                if (cssRule.selectorText && cssRule.selectorText.startsWith('.fa') && cssRule.selectorText.endsWith(before)) {
+                    const ctx = String.fromCodePoint(cssRule.style.content.replace(/'|"/g, '').charCodeAt(0));
+                    this.glyphTable[cssRule.selectorText.slice(1).slice(0, -1 * before.length)] = ctx;
+                    found = true;
+                }
+            }
+        }
+    }
+    this.faMarkerCache = {};
 }
 
 CesiumJs.prototype.addLayer = function addLayer(command_info) {
@@ -341,19 +366,150 @@ const removePoi = function removePoi(poi) {
     }
 }
 
-const buildPoint = function buildPoint(poi, style) {
-    const image = ('icon' in poi)
-        ? ((typeof poi.icon === 'string') ? poi.icon : poi.icon.src)
-        : this.pinBuilder.fromMakiIconId(
-            style.fontSymbol.glyph || 'star',
-            style.fontSymbol.color || Color.GREEN,
-            style.fontSymbol.size || 48);
+const fontAwesomeIcon = function fontAwesomeIcon(fontSymbol) {
+    const glyph = fontSymbol.glyph || 'fa-star';
+    let form = fontSymbol.form || 'marker';
+    const size = fontSymbol.size || 16;
+    const fill = fontSymbol.fill || 'blue';
+    const stroke = fontSymbol.stroke || 'white';
+    let color = fontSymbol.color || stroke;
+    const strokeWidth = fontSymbol.strokeWidth || 3;
+    const margin = fontSymbol.margin || 0.4;
+    const radius = fontSymbol.radius || (size / 2) + strokeWidth + size * margin;
+    const unicode = this.glyphTable[glyph];
+    if (typeof unicode === 'undefined') {
+        form = '';
+    }
 
+    const hash = glyph + form + size + fill + stroke + color + strokeWidth + radius + unicode;
+    if (hash in this.faMarkerCache) {
+        return this.faMarkerCache[hash];
+    }
+
+    const canvas = window.top.document.createElement('canvas');
+    canvas.width  = radius * 2;
+    canvas.height = radius * 2;
+
+    const context = canvas.getContext('2d');
+
+    switch (form) {
+    case 'icon':
+        const size2 = size + strokeWidth * 2;
+        context.font = `600 ${size2}px "Font Awesome 5 Free"`;
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillStyle = stroke;
+        context.fillText(unicode, radius, radius);
+        if (stroke == color) {
+            color = fill;
+        }
+        break;
+    case 'circle':
+        context.arc(radius, radius , radius - strokeWidth - 0.5, 0, 360, false);
+        context.fillStyle = fill;
+        context.fill();
+        context.strokeStyle = stroke;
+        context.lineWidth = strokeWidth;
+        context.stroke();
+        break;
+    case 'box':
+        const s = strokeWidth + 0.5
+        context.beginPath();
+        context.moveTo(s, s);
+        context.lineTo(radius * 2 - s, s);
+        context.lineTo(radius * 2 - s, radius * 2 - s);
+        context.lineTo(s, radius * 2 - s);
+        context.closePath();
+        context.fillStyle = fill;
+        context.fill();
+        context.strokeStyle = stroke;
+        context.lineWidth = strokeWidth;
+        context.stroke();
+        break;
+    case 'marker':
+        canvas.height = canvas.height * 1.2;
+        context.beginPath();
+        context.arc(radius, radius, radius - strokeWidth - 0.5,  0.2 * Math.PI,  0.8 * Math.PI, true);
+        context.lineTo(radius, canvas.height - 0.5);
+        context.closePath();
+        context.fillStyle = fill;
+        context.fill();
+        context.strokeStyle = stroke;
+        context.lineWidth = strokeWidth;
+        context.stroke();
+        break;
+    default: // fallback when unicode is 'undefined'
+        if ('__default' in this.faMarkerCache) {
+            return this.faMarkerCache.__default;
+        }
+        const r = 12;
+        canvas.width = r * 2 + 1;
+        canvas.height = r * 3.2 + 1;
+
+        context.beginPath();
+        context.arc(r, r, r - 0.5, 0.165 * Math.PI, 0.835 * Math.PI, true);
+        context.lineTo(r, canvas.height);
+        context.closePath();
+        context.fillStyle = 'rgb(234, 85, 80)';
+        context.fill();
+
+        context.beginPath();
+        context.arc(r, r, r - 0.5, 0.165 * Math.PI, 0.835 * Math.PI, true);
+        context.lineTo(r, canvas.height - 1);
+        context.closePath();
+        context.strokeStyle = 'rgb(117, 42, 40)';
+        context.lineWidth = 1;
+        context.stroke();
+
+        context.beginPath();
+        context.arc(r, r, r * 0.4, 0, 2 * Math.PI, true);
+        context.fillStyle = 'rgb(117, 42, 40)';
+        context.fill();
+
+        this.faMarkerCache.__default = canvas.toDataURL('image/png', 1.0);
+        return this.faMarkerCache.__default;
+    }
+
+    context.font = `600 ${size}px "Font Awesome 5 Free"`;
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillStyle = color;
+    context.fillText(unicode, radius, radius);
+
+    this.faMarkerCache[hash] = canvas.toDataURL('image/png', 1.0);
+    return this.faMarkerCache[hash];
+}
+
+const buildIconImage = function buildIconImage(poi ,style) {
+    if (poi.icon) {
+        if (typeof poi.icon === 'string') {
+            return poi.icon;
+        }
+        if ('fontawesome' in poi.icon) {
+            if (typeof poi.icon.fontawesome === 'string') {
+                poi.icon.fontawesome = {'glyph': poi.icon.fontawesome || 'fa-star'};
+            }
+            return poi.icon.fontawesome.glyph.startsWith('fa-')
+                ? fontAwesomeIcon.call(this, poi.icon.fontawesome)
+                : this.pinBuilder.fromMakiIconId(
+                    poi.icon.fontawesome.glyph,
+                    poi.icon.fontawesome.color || Color.GREEN,
+                    poi.icon.fontawesome.size || 48);
+        }
+        if ('src' in poi.icon) {
+            return poi.icon.src;
+        }
+    }
+
+    return this.pinBuilder.fromMakiIconId('star', Color.GREEN, 48);
+}
+
+const buildPoint = function buildPoint(poi, style) {
     return {
         id: poi.id,
         position: Cartesian3.fromDegrees(poi.location.coordinates[0], poi.location.coordinates[1]),
         billboard: {
-            image: image,
+            image: buildIconImage.call(this, poi, style),
             verticalOrigin: VerticalOrigin.BOTTOM,
         },
         description: poi.infoWindow || poi.tooltip || ''
@@ -361,14 +517,9 @@ const buildPoint = function buildPoint(poi, style) {
 }
 
 const buildMultiPoint = function buildMultiPoint(poi, style) {
-    const image = ('icon' in poi)
-        ? ((typeof poi.icon === 'string') ? poi.icon : poi.icon.src)
-        : this.pinBuilder.fromMakiIconId(
-            style.fontSymbol.glyph || 'star',
-            style.fontSymbol.color || Color.GREEN,
-            style.fontSymbol.size || 48);
-
+    const image = buildIconImage.call(this, poi, style);
     const ds = new CustomDataSource(poi.id);
+
     for (let point of poi.location.coordinates) {
         ds.entities.add({
             name: poi.data.name || 'no name',
