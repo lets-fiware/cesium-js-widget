@@ -1,3 +1,7 @@
+## v0.x.0
+
+- Add feature for building marker with Font Awesome icon
+
 ## v0.2.0
 
 - Fix register PoIs
