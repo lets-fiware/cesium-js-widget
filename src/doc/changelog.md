@@ -1,4 +1,4 @@
-## v0.x.0
+## v0.3.0
 
 - Add feature for building marker with Font Awesome icon
 
