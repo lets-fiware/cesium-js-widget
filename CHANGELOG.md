@@ -1,3 +1,7 @@
+## Cesium.js widget v0.3.0-next
+
+- Update copyright
+
 ## Cesium.js widget v0.3.0 - June 13, 2021
 
 - Add feature for building marker with Font Awesome icon (#6)

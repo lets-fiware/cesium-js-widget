@@ -60,5 +60,5 @@ The dependencies of dependencies have been omitted from the list.
 
 ## Copyright and License
 
-Copyright (c) 2021 Kazuhito Suda<br>
+Copyright (c) 2021-2022 Kazuhito Suda<br>
 Licensed under the [Apache-2.0 License](./LICENSE).
