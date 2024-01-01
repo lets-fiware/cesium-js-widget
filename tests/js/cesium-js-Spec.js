@@ -2,7 +2,7 @@
  * Cesium.js
  * https://github.com/lets-fiware/cesium-js-widget
  *
- * Copyright (c) 2021-2023 Kazuhito Suda
+ * Copyright (c) 2021-2024 Kazuhito Suda
  * Licensed under Apache-2.0 License
  */
 
